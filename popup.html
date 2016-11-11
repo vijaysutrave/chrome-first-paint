@@ -1,0 +1,89 @@
+<link rel="stylesheet" type="text/css" href="style.css">
+<script type="text/x-template" id="data-header">
+	{{#data}}
+	<div class="row-wrapper">
+		<div class="col-3">
+			<h3 class="load-title">DOMContentLoaded</h3>
+			<div class="load-times">{{contentLoaded}}</div>
+		</div>
+		<div class="col-3">
+			<h3 class="load-title">First Paint</h3>
+			<div class="load-times">{{firstPaint}}</div>
+		</div>
+		<div class="col-3">
+			<h3 class="load-title">Window onLoad</h3>
+			<div class="load-times">{{onLoad}}</div>
+		</div>
+	</div>		
+	{{/data}}
+</script>
+
+<script type="text/x-template" id="broken">
+	<div class="whoops">
+		<div class="header">
+			Whoops! Looks like something's broken here! 
+		</div>
+		<div class="broken">
+			<img src="broken.svg" width="100">
+		</div>
+	</div>
+</script>
+
+<script type="text/x-template" id="chart-topTen">
+	<div class="top-ten">
+	<span class="x-axis">values in ms</span>
+		<div class="ct-chart ct-perfect-fourth"></div>
+	</div>
+</script>
+
+<script type="text/x-template" id="chart-pageStats">
+	<div class="page-stats">
+		<div class="chart-size">
+			<div class="chart-type">
+				<h3 class="chart-main">Resources downloaded by the Page</h3>
+				<span class="info-text">(Values in kb, excluding cached resoures)</span>
+			</div>
+			<div class="ct-perfect-fourth ct-size-pie"></div>
+		</div>
+		<div class="chart-size">
+			<div class="chart-type">
+				<h3 class="chart-main">Number of Resources downloaded</h3>
+				<span class="info-text">(Total number of resources on page, on load)</span>
+			</div>
+			<div class="ct-perfect-fourth ct-number-pie"></div>
+		</div>
+	</div>
+	{{#data}}
+		<div class="other-stats">
+			<div class="row">
+				<div class="col-2 text-center">Total Size downloaded: {{totalSize}}</div>
+				<div class="col-2 text-center">Total No. of Resources: {{totalResources}}</div>
+			</div>
+			<div class="row">
+				<div class="col-2 text-center">Total memory consumed: {{totalMemory}}</div>
+				<div class="col-2 text-center">Time since page open: {{totalTimeOpen}}</div>
+			</div>
+		</div>
+	{{/data}}
+</script>
+
+
+<div class="wrapper">
+<div class="head-info"></div>
+<div class="navigation">
+	<ul class="nav" id="main-navigation">
+		<li class="nav-item selected" render="topTen">Top Ten Requests</li>
+		<li class="nav-item" render="stats">Page Stats</li>
+	</ul>
+</div>
+
+<div class="chart-wrapper">
+
+</div>
+	
+</div>
+<script type="text/javascript" src="jqlite.min.js"></script>
+<script type="text/javascript" src="popup.js"></script>
+<script type="text/javascript" src="chartist.min.js"></script>
+<script type="text/javascript" src="chartist-tooltip.min.js"></script>
+<script type="text/javascript" src="mustache.min.js"></script>
