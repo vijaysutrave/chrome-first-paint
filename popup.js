@@ -1,87 +1,121 @@
 var main = (function() {
-    var resourceTiming, loadTimings, allTimings, perfData, allResourceTimings, memoryInital, memoryMax, filteredArrays = {
-        scriptArray: [],
-        imgArray: [],
-        styleArray: []
-    };
 
-    var wrapperEl = $('.chart-wrapper'),
+    /* Initialise state */
+    var resourceTiming,
+        loadTimings,
+        allTimings,
+        perfData,
+        allResourceTimings,
+        memoryInital,
+        memoryMax,
+        sizeArray,
+        filteredArrays = {
+            scriptArray: [],
+            imgArray: [],
+            styleArray: []
+        },
+        wrapperEl = $('.chart-wrapper'),
         topTenEl = $('#chart-topTen').html(),
-        pageStatsEl = $('#chart-pageStats').html();
+        pageStatsEl = $('#chart-pageStats').html(),
+        noDownloadText = 'Wow! No new resource was downloaded!',
+        noResourceText = 'Holy! No resource exists on page',
+        noRequestsText = 'Great! No blocking resources exist on this page!';
 
     var renderHeader = function() {
         var template = $('#data-header').html();
         var html = Mustache.to_html(template, loadTimings);
         $('.head-info').html(html);
-    }
+    };
 
     var renderBrokenPage = function() {
         var brokenHtml = $('#broken').html();
         $('.wrapper').html(brokenHtml);
     };
 
-
     var renderTopTen = function() {
         wrapperEl.html(topTenEl);
 
-        new Chartist.Bar('.ct-chart', {
-            labels: resourceTiming.map(function(value) {
-                return value.resource
-            }),
-            series: resourceTiming.map(function(value) {
+        var topTenRequests = resourceTiming.map(function(value) {
                 var shortenedResource = value.resource.split('/').slice(-1)[0];
-                console.log(shortenedResource);
                 if (shortenedResource.length > 10) {
                     shortenedResource = shortenedResource.substring(0, 10) + '..' +
                         (shortenedResource.split('.').slice(-1)[0] || '');
                 }
-
                 return {
                     meta: shortenedResource,
                     value: value.fetchTime.toFixed(2)
                 }
-            })
-        }, {
-            distributeSeries: true,
-            height: '400px',
-            plugins: [
-                Chartist.plugins.tooltip()
-            ]
-        }, [
-            ['screen and (min-width: 441px) and (max-width: 1440px)', {
-                showPoint: false,
-                axisX: {
-                    labelInterpolationFnc: function(value) {
-                        var name = value.split('/').slice(-1)[0];
-                        if (name.length > 3) {
-                            var extn = name.split('.')[1] || "";
-                            if (extn && extn.length > 3)
-                                extn = extn.substring(0, 3);
+            });
 
-                            name = name.substring(0, 3) + ".." + extn;
+        /* Render Bar Chart to show to request times */
+        if(topTenRequests.length) {
+            new Chartist.Bar('.ct-chart', {
+                labels: resourceTiming.map(function(value) {
+                    return value.resource
+                }),
+                series: topTenRequests
+            }, {
+                distributeSeries: true,
+                height: '400px',
+                plugins: [
+                    Chartist.plugins.tooltip()
+                ]
+            }, [
+                ['screen and (min-width: 441px) and (max-width: 1440px)', {
+                    showPoint: false,
+                    axisX: {
+                        labelInterpolationFnc: function(value) {
+                            var name = value.split('/').slice(-1)[0];
+                            if (name.length > 3) {
+                                var extn = name.split('.')[1] || "";
+                                if (extn && extn.length > 3)
+                                    extn = extn.substring(0, 3);
+
+                                name = name.substring(0, 3) + ".." + extn;
+                            }
+                            return name;
                         }
-                        return name;
                     }
-                }
-            }]
-        ]);
-    }
+                }]
+            ]);
+        } else {
+            $('.top-ten').addClass('no-requests-text').html(noRequestsText);
+        }
+    };
+
+    var filterArrayByType = function(type) {
+        return allTimings.filter(function(resource) {
+            return resource.initiatorType === type;
+        });
+    };
 
     var allResourceTimes = function() {
         return allTimings.reduce(function(prev, cur) {
             return prev + (cur.transferSize / 1024);
         }, 0).toFixed(2);
-    }
+    };
 
     var getResourceTimes = function(type) {
         return filteredArrays[type].reduce(function(prev, cur) {
             return prev + (cur.transferSize / 1024);
         }, 0);
-    }
+    };
 
     var getResouceCount = function(type) {
         return filteredArrays[type].length;
-    }
+    };
+
+    var totalTimeTaken = function() {
+        return sizeArray.reduce(function(prev, sizeObj) {
+            return prev + sizeObj.size;
+        }, 0);
+    };
+
+    var totalResources = function() {
+        return sizeArray.reduce(function(prev, cur) {
+            return prev + cur.count;
+        }, 0);
+    };
 
     var renderPageStats = function() {
 
@@ -96,7 +130,9 @@ var main = (function() {
         }
         var html = Mustache.to_html(pageStatsEl, otherStats);
         wrapperEl.html(html);
-        var sizeArray = [{
+
+        /* Array to hold all pie chart info */
+        sizeArray = [{
             name: 'Images',
             size: getResourceTimes('imgArray'),
             count: getResouceCount('imgArray')
@@ -110,18 +146,6 @@ var main = (function() {
             count: getResouceCount('styleArray')
         }];
 
-        var totalTimeTaken = function() {
-            return sizeArray.reduce(function(prev, sizeObj) {
-                return prev + sizeObj.size;
-            }, 0);
-        }
-
-        var totalResources = function() {
-            return sizeArray.reduce(function(prev, cur) {
-                return prev + cur.count;
-            }, 0);
-        }
-
         var dataSize = {
             series: []
         };
@@ -133,7 +157,7 @@ var main = (function() {
                     meta: resource.name
                 }
             })
-        }
+        };
 
         sizeArray.forEach(function(sizeObj) {
             if (sizeObj.size) {
@@ -144,58 +168,78 @@ var main = (function() {
             }
         });
 
-        new Chartist.Pie('.ct-size-pie', dataSize, {
-            labelInterpolationFnc: function(value, series) {
-                return value + ' (' + ((data.series[series] / totalTimeTaken()) * 100).toFixed(1) + '%) '
-            },
-            showLabel: false,
-            height: '200px',
-            labelDirection: 'explode',
-            plugins: [
-                Chartist.plugins.tooltip()
-            ]
-        });
 
+        if (dataSize.series.length) {
+            new Chartist.Pie('.ct-size-pie', dataSize, {
+                labelInterpolationFnc: function(value, series) {
+                    return value + ' (' + ((data.series[series] / totalTimeTaken()) * 100).toFixed(1) + '%) '
+                },
+                showLabel: false,
+                height: '200px',
+                labelDirection: 'explode',
+                plugins: [
+                    Chartist.plugins.tooltip()
+                ]
+            });
+        } else {
+            $('.ct-size-pie').addClass('no-download-text').html(noDownloadText);
+        }
 
-        new Chartist.Pie('.ct-number-pie', dataCount, {
-            labelInterpolationFnc: function(value, series) {
-                return value + ' (' + ((data.series[series] / totalResources()) * 100).toFixed(1) + '%) '
-            },
-            showLabel: false,
-            height: '200px',
-            labelDirection: 'explode',
-            plugins: [
-                Chartist.plugins.tooltip()
-            ]
-        });
+        if (dataCount.series.length) {
+            new Chartist.Pie('.ct-number-pie', dataCount, {
+                labelInterpolationFnc: function(value, series) {
+                    return value + ' (' + ((data.series[series] / totalResources()) * 100).toFixed(1) + '%) '
+                },
+                showLabel: false,
+                height: '200px',
+                labelDirection: 'explode',
+                plugins: [
+                    Chartist.plugins.tooltip()
+                ]
+            });
+        } else {
+            $('.ct-number-pie').addClass('no-resource-text').html(noResourceText);
+        }
 
-    }
+    };
 
-    var filterArrayByType = function(type) {
-        return allTimings.filter(function(resource) {
-            return resource.initiatorType === type;
-        });
-    }
+    var render = {
+        header: renderHeader,
+        topTen: renderTopTen,
+        stats: renderPageStats
+    };
+
+    var tabChange = function(e) {
+        $('.nav-item').removeClass('selected');
+        $(e.target).addClass('selected');
+        var getViewToRender = $(e.target).attr('render');
+        render[getViewToRender]();
+    };
+
+    var addPageEventListeners = function() {
+        document.getElementById('main-navigation').addEventListener('click', tabChange, false);
+    };
 
 
     var init = function() {
-
-
         chrome.tabs.getSelected(null, function(tab) {
             chrome.storage.local.get('loadTimes', function(data) {
                 try {
+
+                    addPageEventListeners();
+
                     var tabPerformance = data.loadTimes['tab' + tab.id],
                         paints = tabPerformance.chromeData,
                         resources = tabPerformance.resources;
 
                     perfData = tabPerformance.pageLoad,
-                        memoryInitial = tabPerformance.memoryInitial;
+                    memoryInitial = tabPerformance.memoryInitial,
                     memoryMax = tabPerformance.memoryMax;
                     allTimings = resources;
 
                     filteredArrays.scriptArray = filterArrayByType('script'),
-                        filteredArrays.imgArray = filterArrayByType('img'),
-                        filteredArrays.styleArray = filterArrayByType('link');
+                    filteredArrays.imgArray = filterArrayByType('img'),
+                    filteredArrays.styleArray = filterArrayByType('link');
 
                     resourceTiming = resources.filter(function(value) {
                             return value.initiatorType !== 'img' && value.initiatorType !== 'xmlhttprequest';
@@ -207,11 +251,15 @@ var main = (function() {
                                 size: value.transferSize
                             }
                         }).sort(function(a, b) {
-                            if (a.fetchTime > b.fetchTime) return -1;
-                            else return 1
+                            if (a.fetchTime > b.fetchTime) {
+                                return -1;
+                            } else {
+                                return 1
+                            }
                         })
                         .splice(0, 10);
 
+                    /* All the math required */
                     var contentLoaded = perfData.domContentLoadedEventEnd - perfData.fetchStart,
                         onLoad = perfData.loadEventStart - perfData.navigationStart,
                         firstPaint = (paints.firstPaintTime * 1000) - perfData.navigationStart;
@@ -224,45 +272,25 @@ var main = (function() {
                         }
                     };
 
-                    //render header 
+                    /* render header */ 
                     renderHeader(loadTimings)
 
-                    //call top ten
+                    /* call top ten */
                     renderTopTen(resourceTiming);
+
                 } catch (e) {
                     console.log(e);
                     renderBrokenPage();
                 }
             });
         });
-
-
-
-
     };
 
     return {
-        init: init,
-        render: {
-            header: renderHeader,
-            topTen: renderTopTen,
-            stats: renderPageStats
-        }
+        init: init
     }
 
 })();
 
-
+/* Load the awesome! */
 main.init();
-
-var tabChange = function(e) {
-    $('.nav-item').removeClass('selected');
-    $(e.target).addClass('selected');
-    var getViewToRender = $(e.target).attr('render');
-    main.render[getViewToRender]();
-}
-
-/* 
- * Add listeners for tab change
- */
-document.getElementById('main-navigation').addEventListener('click', tabChange, false);

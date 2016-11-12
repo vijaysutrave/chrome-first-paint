@@ -1,14 +1,14 @@
 {
 	"manifest_version": 2,
-	"name": "My Cool Extension",
+	"name": "First Paint",
 	"version": "0.1",
 	"browser_action" : {
-		"default_icon": "timer48.png",
+		"default_icon": "icons/timer48.png",
 		"default_popup": "popup.html"
 	},
-	"icons": { "16": "timer16.png",
-           "48": "timer48.png",
-          "128": "timer128.png" },
+	"icons": { "16": "icons/timer16.png",
+           "48": "icons/timer48.png",
+          "128": "icons/timer128.png" },
 	"background": {
 		"scripts": ["background.js"]
 	},

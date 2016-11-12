@@ -1,9 +1,8 @@
 var firstPaintTime;
 chrome.runtime.onMessage.addListener(function(res, sender, sendResponse) {
 	 chrome.storage.local.get('loadTimes', function(data) {
-        if (!data.loadTimes) 
-        	data.loadTimes = {};           
-        // data.loadTimes['tab' + sender.tab.id] = data.loadTimes['tab' + sender.tab.id] || {};
+
+        data.loadTimes = data.loadTimes || {};           
 
         data.loadTimes['tab' + sender.tab.id] = {
             pageLoad: res.pageLoad,
@@ -13,10 +12,8 @@ chrome.runtime.onMessage.addListener(function(res, sender, sendResponse) {
             memoryMax: res.memoryMax
         }
 
-
         firstPaintTime = String((((res.paints.firstPaintTime * 1000) - res.pageLoad.navigationStart) /1000).toFixed(2));
         chrome.storage.local.set(data);
-        console.log(firstPaintTime);
         chrome.browserAction.setBadgeText({text: firstPaintTime, tabId: sender.tab.id});
     });
 });

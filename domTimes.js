@@ -1,4 +1,10 @@
-window.addEventListener('load', function() {
+if(document.readyState == "complete") {
+	sendTimes();
+} else {
+	window.addEventListener('load', sendTimes, false);
+}
+
+function sendTimes() {
 	window.setTimeout(function() {
 		chrome.runtime.sendMessage({
 			pageLoad: window.performance && window.performance.timing,
@@ -7,7 +13,6 @@ window.addEventListener('load', function() {
 			memoryInitial: window.performance.memory && performance.memory.usedJSHeapSize,
 			memoryMax: window.performance.memory && window.performance.memory.jsHeapSizeLimit
 		});
-		console.log(performance.memory);
 	}, 1000);
-	}, false);
+}
 
