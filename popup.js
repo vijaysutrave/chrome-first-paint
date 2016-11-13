@@ -213,6 +213,7 @@ var main = (function() {
         $('.nav-item').removeClass('selected');
         $(e.target).addClass('selected');
         var getViewToRender = $(e.target).attr('render');
+         _gaq.push(['_trackEvent', getViewToRender, 'clicked']);
         render[getViewToRender]();
     };
 
