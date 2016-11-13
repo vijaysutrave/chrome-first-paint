@@ -200,7 +200,6 @@ var main = (function() {
         } else {
             $('.ct-number-pie').addClass('no-resource-text').html(noResourceText);
         }
-
     };
 
     var render = {
