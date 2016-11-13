@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "First Paint / Page Load Numbers",
-	"version": "1.0",
+	"version": "0.0.1",
 	"description": "First paint time, page load time optimization numbers",
 	"browser_action" : {
 		"default_icon": "icons/timer48.png",
