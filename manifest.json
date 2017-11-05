@@ -7,10 +7,10 @@
 		"default_icon": "icons/timer48.png",
 		"default_popup": "popup.html"
 	},
-	"icons": { 
+	"icons": {
 		"16": "icons/timer16.png",
         "48": "icons/timer48.png",
-        "128": "icons/timer128.png" 
+        "128": "icons/timer128.png"
     },
 	"background": {
 		"scripts": ["background.js"]
@@ -19,6 +19,7 @@
 	"permissions": ["storage"],
 	"content_scripts": [{
 		"matches": ["http://*/*", "https://*/*"],
-		"js": ["domTimes.js"]
+		"js": ["domTimes.js"],
+		"run_at": "document_start"
 	}]
 }

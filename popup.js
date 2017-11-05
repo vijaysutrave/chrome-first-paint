@@ -19,7 +19,7 @@ var main = (function() {
         pageStatsEl = $('#chart-pageStats').html(),
         noDownloadText = 'Wow! No new resource was downloaded!',
         noResourceText = 'Holy! No resource exists on page',
-        noRequestsText = 'Great! No blocking resources exist on this page!';
+        noRequestsText = 'Great! No blocking resources, or assets were previously cached';
 
     var renderHeader = function() {
         var template = $('#data-header').html();
@@ -272,7 +272,7 @@ var main = (function() {
                         }
                     };
 
-                    /* render header */ 
+                    /* render header */
                     renderHeader(loadTimings)
 
                     /* call top ten */

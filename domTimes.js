@@ -1,8 +1,4 @@
-if(document.readyState == "complete") {
-	sendTimes();
-} else {
-	window.addEventListener('load', sendTimes, false);
-}
+window.addEventListener('load', sendTimes, false);
 
 function sendTimes() {
 	window.setTimeout(function() {
@@ -13,6 +9,5 @@ function sendTimes() {
 			memoryInitial: window.performance.memory && performance.memory.usedJSHeapSize,
 			memoryMax: window.performance.memory && window.performance.memory.jsHeapSizeLimit
 		});
-	}, 1000);
+	}, 500)
 }
-
