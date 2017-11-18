@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "First Paint & Page Load Time",
 	"short_name": "First Paint Time",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "First paint time, page load time, to optimize your webpages",
 	"browser_action" : {
 		"default_icon": "icons/timer48.png",
